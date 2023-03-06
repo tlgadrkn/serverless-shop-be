@@ -40,12 +40,8 @@ const serverlessConfiguration: AWS = {
               'dynamodb:PutItem',
               'dynamodb:DeleteItem',
             ],
-            // Resource: 'arn:aws:dynamodb:us-east-2:886080545251:table/products',
             Resource:
               'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE}',
-            // Resource: {
-            //   'Fn::GetAtt': ['products', 'Arn'],
-            // },
           },
           {
             Effect: 'Allow',
@@ -58,11 +54,6 @@ const serverlessConfiguration: AWS = {
             ],
             Resource:
               'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.STOCKS_TABLE}',
-
-            // Resource: {
-            //   'Fn::GetAtt': ['stocks', 'Arn'],
-            // },
-            // 'arn:aws:dynamodb:us-east-2:886080545251:table/stocks',
           },
         ],
       },
@@ -92,7 +83,6 @@ const serverlessConfiguration: AWS = {
         ProductsTable: {
           Type: 'AWS::DynamoDB::Table',
           Properties: {
-            // TableName: 'products',
             TableName: '${self:provider.environment.PRODUCTS_TABLE}',
             AttributeDefinitions: [
               {
@@ -119,7 +109,6 @@ const serverlessConfiguration: AWS = {
         StocksTable: {
           Type: 'AWS::DynamoDB::Table',
           Properties: {
-            // TableName: 'stocks',
             TableName: '${self:provider.environment.STOCKS_TABLE}',
             AttributeDefinitions: [
               {
