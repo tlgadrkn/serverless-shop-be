@@ -1,5 +1,7 @@
 import type {AWS} from '@serverless/typescript'
 import {getProductsList, getProductsById, createProduct} from '@functions/index'
+import {CatalogItemsQueueResource} from './resources/sqs'
+import {Notifications} from './resources/notifications'
 
 const serverlessConfiguration: AWS = {
   service: 'productservice',
@@ -54,6 +56,19 @@ const serverlessConfiguration: AWS = {
             ],
             Resource:
               'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.STOCKS_TABLE}',
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              'sqs:SendMessage',
+              'sqs:ReceiveMessage',
+              'sqs:DeleteMessage',
+              'sqs:GetQueueUrl',
+              'sqs:ListQueues',
+              'sqs:CreateQueue',
+              'sqs:DeleteQueue',
+            ],
+            Resource: 'arn:aws:sqs:${self:provider.region}:*',
           },
         ],
       },
@@ -128,6 +143,8 @@ const serverlessConfiguration: AWS = {
             },
           },
         },
+        ...CatalogItemsQueueResource,
+        ...Notifications,
       },
     },
   },

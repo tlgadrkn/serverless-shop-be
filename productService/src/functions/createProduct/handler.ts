@@ -33,32 +33,32 @@ export const createProduct: ValidatedEventAPIGatewayProxyEvent<
       image: 'https://picsum.photos/200',
     }
 
-    const params = {
-      TransactItems: [
-        {
-          Put: {
-            TableName: process.env.PRODUCTS_TABLE,
-            Item: {
-              ...product,
-            },
-          },
-        },
-        {
-          Put: {
-            TableName: process.env.STOCKS_TABLE,
-            Item: {
-              product_id: product.id,
-              count: product.count || 1,
-            },
-          },
-        },
-      ],
-    }
-    const result = await docClient.transactWrite(params).promise()
+    // const params = {
+    //   TransactItems: [
+    //     {
+    //       Put: {
+    //         TableName: process.env.PRODUCTS_TABLE,
+    //         Item: {
+    //           ...product,
+    //         },
+    //       },
+    //     },
+    //     {
+    //       Put: {
+    //         TableName: process.env.STOCKS_TABLE,
+    //         Item: {
+    //           product_id: product.id,
+    //           count: product.count || 1,
+    //         },
+    //       },
+    //     },
+    //   ],
+    // }
+    const result = createProductInDB(product)
 
     return formatJSONResponse(
       {
-        body: `item created ${result.$response.data}`,
+        body: `item created ${result}`,
       },
       201,
     )
@@ -70,6 +70,33 @@ export const createProduct: ValidatedEventAPIGatewayProxyEvent<
       500,
     )
   }
+}
+
+export const createProductInDB = async (product) => {
+  const params = {
+    TransactItems: [
+      {
+        Put: {
+          TableName: process.env.PRODUCTS_TABLE,
+          Item: {
+            ...product,
+          },
+        },
+      },
+      {
+        Put: {
+          TableName: process.env.STOCKS_TABLE,
+          Item: {
+            product_id: product.id,
+            count: product.count || 1,
+          },
+        },
+      },
+    ],
+  }
+  const result = await docClient.transactWrite(params).promise()
+
+  return result
 }
 
 export const main = middyfy(createProduct)
