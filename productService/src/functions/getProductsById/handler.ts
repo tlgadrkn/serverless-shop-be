@@ -1,26 +1,43 @@
-import {formatJSONResponse} from '../../libs/api-gateway'
+import {APIGatewayProxyEvent} from 'aws-lambda'
+import createErrorResponse, {formatJSONResponse} from '../../libs/api-gateway'
 import {middyfy} from '../../libs/lambda'
-import {data} from '../../mocks/mock'
+import DynamoDB from 'aws-sdk/clients/dynamodb'
+const docClient = new DynamoDB.DocumentClient()
 
-export const getProductsById = async (event) => {
+export const getProductsById = async (event: APIGatewayProxyEvent) => {
   try {
+    console.log('getProductsById Lambda: ', event)
     const id = event.pathParameters.productId
-    const filteredProduct = data.find((item) => item.id === id)
-    if (!filteredProduct) {
-      return formatJSONResponse(
-        {
-          body: `Product with ${id} not found.`,
-        },
-        404,
-      )
+
+    const params = {
+      TableName: process.env.PRODUCTS_TABLE,
+      KeyConditionExpression: 'id = :id',
+      ExpressionAttributeValues: {':id': id},
     }
+
+    const productData = await docClient.query({...params}).promise()
+
+    if (!productData.Items[0]) {
+      return createErrorResponse(404, `Product with ${id} not found.`)
+    }
+
+    const stockData = await docClient
+      .query({
+        TableName: process.env.STOCKS_TABLE,
+        KeyConditionExpression: 'product_id = :product_id',
+        ExpressionAttributeValues: {':product_id': id},
+      })
+      .promise()
+
+    const data = {...productData.Items[0], count: stockData?.Items[0]?.count}
+
     return formatJSONResponse({
-      body: filteredProduct,
+      body: data,
     })
   } catch (error) {
     return formatJSONResponse(
       {
-        body: error,
+        body: error.message,
       },
       500,
     )
