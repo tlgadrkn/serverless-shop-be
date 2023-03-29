@@ -22,12 +22,14 @@ const serverlessConfiguration: AWS = {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
     },
+
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
       region: '${self:provider.region}',
       BUCKET_NAME: 'importservicebucket',
     },
+
     iam: {
       role: {
         statements: [
@@ -72,6 +74,13 @@ const serverlessConfiguration: AWS = {
             BucketName: 'importservicebucket',
           },
         },
+      },
+    },
+    authorizers: {
+      myBasicAuthorizer: {
+        type: 'request',
+        functionArn:
+          '${cf:authorization-service-${sls:stage}.BasicAuthorizerLambdaFunctionQualifiedArn}',
       },
     },
   },

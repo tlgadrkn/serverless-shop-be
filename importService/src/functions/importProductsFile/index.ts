@@ -8,6 +8,9 @@ export default {
         method: 'get',
         path: '/import',
         cors: true,
+        authorizer: {
+          name: 'myBasicAuthorizer',
+        },
         request: {
           parameters: {
             querystrings: {
